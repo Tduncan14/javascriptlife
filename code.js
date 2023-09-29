@@ -1,200 +1,167 @@
-var rows = 24
-var cols = 24
-
-const gridContainer = document.querySelector('#gridContainer');
-
-
+var rows = 24;
+var cols = 24;
 var playing = false;
 
+var grid = new Array(rows);
+var nextGrid = new Array(rows);
 
-let grid = new Array(rows)
-let nextGrid = new Array(rows)
-
-
-// initializing the grids
-
-function initializeGrid(){
-
-     for(let i = 0; i < rows; i++){
+function initializeGrids() {
+    for (var i = 0; i < rows; i++) {
         grid[i] = new Array(cols);
-        nextGrid[i] = new Array(cols)
-     }
-
-
+        nextGrid[i] = new Array(cols);
+    }
 }
-
-// resets grid
-
-function resetGrids(){
-
-    for(let i = 0; i < rows; i++){
-        for(let j = 0; j < cols; j++){
-
+function resetGrids() {
+    for (var i = 0; i < rows; i++) {
+        for (var j = 0; j < cols; j++) {
             grid[i][j] = 0;
             nextGrid[i][j] = 0;
-
         }
     }
-
-
 }
-
 
 // initialize
-function initialize(){
-    createTable()
-    initializeGrid()
-    resetGrids()
-    setupControlsButtons()
-
+function initialize() {
+    createTable();
+    initializeGrids();
+    resetGrids();
+    setupControlButtons();
 }
 
-
-// layout the board
-
-function createTable(){
+// lay out the grid 
+function createTable() {
+    var gridContainer = document.getElementById("gridContainer");
+    if (!gridContainer) {
+        // throw error
+        console.error("Problem: no div for the grid table!");
+    }
     var table = document.createElement("table");
 
-    if(!gridContainer){
-        throw new Error('no table for rows')
-    }
-
-    for(var i = 0; i < rows; i++){
+    for (var i = 0; i < rows; i++) {
         var tr = document.createElement("tr");
-        for(var j = 0; j < cols; j++){
-            var cell = document.createElement("td")
-            cell.setAttribute("id",i +"_"+ j);
-            cell.setAttribute("class","dead");
+        for (var j = 0; j < cols; j++) {
+            var cell = document.createElement("td");
+            cell.setAttribute("id", i + "_" + j);
+            cell.setAttribute("class", "dead");
             cell.onclick = cellClickHandler;
             tr.appendChild(cell);
         }
-        table.appendChild(tr)
+        table.appendChild(tr);
     }
- 
-      gridContainer.appendChild(table)
-
-
+    gridContainer.appendChild(table);
 }
 
-function cellClickHandler(){
+function cellClickHandler() {
+    var rowcol = this.id.split("_");
+    var row = rowcol[0];
+    var col = rowcol[1];
 
-    let rowcol = this.id.split("_");
-    let row = rowcol[0]
-    let col = rowcol[1]
-
-     let classes = this.getAttribute('class');
-     if(classes.indexOf("live") > -1){
-         this.setAttribute("class","dead")
-         grid[row][col] = 0 ;
-     }
-     else{
-        this.setAttribute("class","live")
+    var classes = this.getAttribute("class");
+    if (classes.indexOf("live") > -1) {
+        this.setAttribute("class", "dead");
+        grid[row][col] = 0;
+    } else {
+        this.setAttribute("class", "live");
         grid[row][col] = 1;
-     }
-
+    }
 }
 
-
-
-// start everthing
-
-function setupControlsButtons(){
-    // button to start 
-
-    let startButton = document.getElementById('start');
+function setupControlButtons() {
+    // button to start
+    var startButton = document.getElementById("start");
     startButton.onclick = startButtonHandler;
 
     // button to clear
-
-    let clearButton = document.querySelector('#clear')
+    var clearButton = document.getElementById("clear");
     clearButton.onclick = clearButtonHandler;
-
-
-
-
-
 }
 
-function clearButtonHandler(){
+function clearButtonHandler() {
+    console.log("Clear the game: stop playing, clear the grid");
     playing = false;
-    let startButton = document.querySelector("#start");
-    startButton.innerHTML = "start"
-
+    var startButton = document.getElementById("start");
+    startButton.innerHTML = "start";
 }
 
-function startButtonHandler(){
-
-    if(playing){
-        playing = false
-        this.innerHTML ="continue"
+// start/pause/continue the game
+function startButtonHandler() {
+    if (playing) {
+        console.log("Pause the game");
+        playing = false;
+        this.innerHTML = "continue";
+    } else {
+        console.log("Continue the game");
+        playing = true;
+        this.innerHTML = "pause";
+        play();
     }
-    else{
-        playing = true
-        this.innerHTML ="pause"
-        play()
-    }
-
 }
 
+// run the life game
+function play() {
+    computeNextGen();
+}
 
-function computeNextGen(){
-        for(let i = 0; i < rows; i++){
-            for(let j = 0; j < cols; j++){
-                applyRules(i,j)
-            }
+function computeNextGen() {
+    for (var i = 0; i < rows; i++) {
+        for (var j = 0; j < cols; j++) {
+            applyRules(i, j);
         }
-
+    }
 }
 
-function applyRules(row,col){
-      let numNeighbors = countNeighbors(row,col);
-
-      if(grid[row][col] == 1){
-          if(numNeighbors < 2){
+// RULES
+// Any live cell with fewer than two live neighbours dies, as if caused by under-population.
+// Any live cell with two or three live neighbours lives on to the next generation.
+// Any live cell with more than three live neighbours dies, as if by overcrowding.
+// Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+function applyRules(row, col) {
+    var numNeighbors = countNeighbors(row, col);
+    if (grid[row][col] == 1) {
+        if (numNeighbors < 2) {
             nextGrid[row][col] = 0;
-          }
-          else if(numNeighbors == 2 || numNeighbors == 3){
-              nextGrid[row][col] = 1
-          }
-          else if (numNeighbors > 3) {
-              nextGrid[row][col] = 0
-          }
-
-      }
-        else if( grid[row][col] == 0 ) {
-            if(numNeighbors == 3) {
-                nextGrid[row][col] = 1
-            }
+        } else if (numNeighbors == 2 || numNeighbors == 3) {
+            nextGrid[row][col] = 1;
+        } else if (numNeighbors > 3) {
+            nextGrid[row][col] = 0;
         }
-    
+    } else if (grid[row][col] == 0) {
+        if (numNeighbors == 3) {
+            nextGrid[row][col] = 1;
+        }
+    }
+}
+
+function countNeighbors(row, col) {
+    var count = 0;
+    if (row-1 >= 0) {
+        if (grid[row-1][col] == 1) count++;
+    }
+    if (row-1 >= 0 && col-1 >= 0) {
+        if (grid[row-1][col-1] == 1) count++;
+    }
+    if (row-1 >= 0 && col+1 < cols) {
+        if (grid[row-1][col+1] == 1) count++;
+    }
+    if (col-1 >= 0) {
+        if (grid[row][col-1] == 1) count++;
+    }
+    if (col+1 < cols) {
+        if (grid[row][col+1] == 1) count++;
+    }
+    if (row+1 < rows) {
+        if (grid[row+1][col] == 1) count++;
+    }
+    if (row+1 < rows && col-1 >= 0) {
+        if (grid[row+1][col-1] == 1) count++;
+    }
+    if (row+1 < rows && col+1 < cols) {
+        if (grid[row+1][col+1] == 1) count++;
+    }
+    return count;
 }
 
 
-function countNeighbors(row,col){
-     let count = 0 
-     if(row - 1 >= 0){
-        if(grid[row-1][col] == 1 ) count++;
-     }
-     if(row - 1 >= 0 && col-1 >= 0) {
-        if(grid[row-1][col-1] == 1) count++
-     }
-     if(row - 1 >= 0 && cols + 1 < cols){
-        if(grid[row-1][col + 1] == 1 ) count++
-     }
-     if(col-1 >= 0){
-        if(grid[row][col-1] == 1) count++
-     }
-     if(col+1 < cols){
-         if(grid[row][col+1] == 1) count++
-     }
-     if(row+1 < rows){
-        if(grid[row+1][col] == 1 ) count ++
-     }
-     if(row+1 < rows && col-1 >= 0){
-        if(grid[row+1][col-1] == 1) count++
-     }
-    
-}
-
+// start everything
 
 window.onload = initialize;
