@@ -1,13 +1,17 @@
 var rows = 24
 var cols = 24
 
-const gridContainer = document.querySelector('#gridContainer')
+const gridContainer = document.querySelector('#gridContainer');
+
+
+var playing = false;
 
 
 
 // initialize
 function initialize(){
     createTable()
+    setupControlsButtons()
 
 }
 
@@ -52,5 +56,30 @@ function cellClickHandler(){
 
 
 // start everthing
+
+function setupControlsButtons(){
+    // button to start 
+
+    let startButton = document.getElementById('start');
+    startButton.onclick = startButtonHandler;
+
+    // button to clear
+
+    let clearButton = document.querySelector('#clear')
+    clearButton.onclick = clearButtonHandler;
+
+
+
+
+
+}
+
+function clearButtonHandler(){
+
+}
+
+function startButtonHandler(){
+
+}
 
 window.onload = initialize;
