@@ -1,6 +1,8 @@
-var rows = 25;
-var cols = 70
+var rows = 50;
+var cols = 50;
 var playing = false;
+var timer;
+var reproductionTime = 100;
 
 var grid = new Array(rows);
 var nextGrid = new Array(rows);
@@ -19,37 +21,14 @@ function resetGrids() {
         }
     }
 }
-
-
-function copyAndResetGrid(){
-    for(var i = 0; i < rows; i++){
-        for(var j = 0; j < cols; j++){
-            grid[i][j] = nextGrid[i][j]
+function copyAndResetGrid() {
+    for (var i = 0; i < rows; i++) {
+        for (var j = 0; j < cols; j++) {
+            grid[i][j] = nextGrid[i][j];
             nextGrid[i][j] = 0;
         }
     }
 }
-
-
-function updateView(){
-     for(let i = 0; i < rows; i++){
-         for(let j = 0; j < cols; j++){
-             var cell = document.getElementById(i +"_" + j);
-
-             if(grid[i][j] == 0){
-                 cell.setAttribute("class","dead")
-                 
-             }
-             else{
-                cell.setAttribute("class","live")
-             }
-         }
-
-     }
-}
-
-
-
 
 // initialize
 function initialize() {
@@ -81,7 +60,6 @@ function createTable() {
     }
     gridContainer.appendChild(table);
 }
-
 function cellClickHandler() {
     var rowcol = this.id.split("_");
     var row = rowcol[0];
@@ -97,6 +75,19 @@ function cellClickHandler() {
     }
 }
 
+function updateView() {
+    for (var i = 0; i < rows; i++) {
+        for (var j = 0; j < cols; j++) {
+            var cell = document.getElementById(i + "_" + j);
+            if (grid[i][j] == 0) {
+                cell.setAttribute("class", "dead");
+            } else {
+                cell.setAttribute("class", "live");
+            }
+        }
+    }
+}
+
 function setupControlButtons() {
     // button to start
     var startButton = document.getElementById("start");
@@ -105,13 +96,46 @@ function setupControlButtons() {
     // button to clear
     var clearButton = document.getElementById("clear");
     clearButton.onclick = clearButtonHandler;
+
+    // button to set random initial state
+    var randomButton = document.getElementById("random");
+    randomButton.onclick = randomButtonHandler;
+}
+
+function randomButtonHandler() {
+    if (playing) return;
+    clearButtonHandler();
+    for (var i = 0; i < rows; i++) {
+        for (var j = 0; j < cols; j++) {
+            var isLive = Math.round(Math.random());
+            if (isLive == 1) {
+                var cell = document.getElementById(i + "_" + j);
+                cell.setAttribute("class", "live");
+                grid[i][j] = 1;
+            }
+        }
+    }
 }
 
 function clearButtonHandler() {
     console.log("Clear the game: stop playing, clear the grid");
+
     playing = false;
     var startButton = document.getElementById("start");
     startButton.innerHTML = "start";
+    clearTimeout(timer);
+
+    var cellsList = document.getElementsByClassName("live");
+    // convert to array first, otherwise, you're working on a live node list
+    // and the update doesn't work!
+    var cells = [];
+    for (var i = 0; i < cellsList.length; i++) {
+        cells.push(cellsList[i]);
+    }
+    for (var i = 0; i < cells.length; i++) {
+        cells[i].setAttribute("class", "dead");
+    }
+    resetGrids();
 }
 
 // start/pause/continue the game
@@ -120,18 +144,24 @@ function startButtonHandler() {
         console.log("Pause the game");
         playing = false;
         this.innerHTML = "continue";
+        clearTimeout(timer);
     } else {
         console.log("Continue the game");
+        // updateView(); ??
         playing = true;
         this.innerHTML = "pause";
-        play();
+        play(); 
     }
 }
 
 // run the life game
 function play() {
     computeNextGen();
+    if (playing) {
+        timer = setTimeout(play, reproductionTime);
+    }
 }
+
 
 function computeNextGen() {
     for (var i = 0; i < rows; i++) {
@@ -139,6 +169,10 @@ function computeNextGen() {
             applyRules(i, j);
         }
     }
+    // clear out the current array
+    copyAndResetGrid();
+    // copy all 1 values to "live" in the table
+    updateView();
 }
 
 // RULES
@@ -191,7 +225,6 @@ function countNeighbors(row, col) {
     }
     return count;
 }
-
 
 // start everything
 
