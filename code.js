@@ -1,5 +1,5 @@
-var rows = 24;
-var cols = 24;
+var rows = 25;
+var cols = 70
 var playing = false;
 
 var grid = new Array(rows);
@@ -19,6 +19,37 @@ function resetGrids() {
         }
     }
 }
+
+
+function copyAndResetGrid(){
+    for(var i = 0; i < rows; i++){
+        for(var j = 0; j < cols; j++){
+            grid[i][j] = nextGrid[i][j]
+            nextGrid[i][j] = 0;
+        }
+    }
+}
+
+
+function updateView(){
+     for(let i = 0; i < rows; i++){
+         for(let j = 0; j < cols; j++){
+             var cell = document.getElementById(i +"_" + j);
+
+             if(grid[i][j] == 0){
+                 cell.setAttribute("class","dead")
+                 
+             }
+             else{
+                cell.setAttribute("class","live")
+             }
+         }
+
+     }
+}
+
+
+
 
 // initialize
 function initialize() {
