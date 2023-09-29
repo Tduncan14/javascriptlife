@@ -7,10 +7,44 @@ const gridContainer = document.querySelector('#gridContainer');
 var playing = false;
 
 
+let grid = new Array(rows)
+let nextGrid = new Array(rows)
+
+
+// initializing the grids
+
+function initializeGrid(){
+
+     for(let i = 0; i < rows; i++){
+        grid[i] = new Array(cols);
+        nextGrid[i] = new Array(cols)
+     }
+
+
+}
+
+// resets grid
+
+function resetGrids(){
+
+    for(let i = 0; i < rows; i++){
+        for(let j = 0; j < cols; j++){
+
+            grid[i][j] = 0;
+            nextGrid[i][j] = 0;
+
+        }
+    }
+
+
+}
+
 
 // initialize
 function initialize(){
     createTable()
+    initializeGrid()
+    resetGrids()
     setupControlsButtons()
 
 }
@@ -46,9 +80,11 @@ function cellClickHandler(){
      let classes = this.getAttribute('class');
      if(classes.indexOf("live") > -1){
          this.setAttribute("class","dead")
+         grid[row][col] = 0 ;
      }
      else{
         this.setAttribute("class","live")
+        grid[row][col] = 1;
      }
 
 }
