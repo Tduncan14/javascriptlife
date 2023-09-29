@@ -77,6 +77,11 @@ function createTable(){
 }
 
 function cellClickHandler(){
+
+    let rowcol = this.id.split("_");
+    let row = rowcol[0]
+    let col = rowcol[1]
+
      let classes = this.getAttribute('class');
      if(classes.indexOf("live") > -1){
          this.setAttribute("class","dead")
@@ -130,5 +135,66 @@ function startButtonHandler(){
     }
 
 }
+
+
+function computeNextGen(){
+        for(let i = 0; i < rows; i++){
+            for(let j = 0; j < cols; j++){
+                applyRules(i,j)
+            }
+        }
+
+}
+
+function applyRules(row,col){
+      let numNeighbors = countNeighbors(row,col);
+
+      if(grid[row][col] == 1){
+          if(numNeighbors < 2){
+            nextGrid[row][col] = 0;
+          }
+          else if(numNeighbors == 2 || numNeighbors == 3){
+              nextGrid[row][col] = 1
+          }
+          else if (numNeighbors > 3) {
+              nextGrid[row][col] = 0
+          }
+
+      }
+        else if( grid[row][col] == 0 ) {
+            if(numNeighbors == 3) {
+                nextGrid[row][col] = 1
+            }
+        }
+    
+}
+
+
+function countNeighbors(row,col){
+     let count = 0 
+     if(row - 1 >= 0){
+        if(grid[row-1][col] == 1 ) count++;
+     }
+     if(row - 1 >= 0 && col-1 >= 0) {
+        if(grid[row-1][col-1] == 1) count++
+     }
+     if(row - 1 >= 0 && cols + 1 < cols){
+        if(grid[row-1][col + 1] == 1 ) count++
+     }
+     if(col-1 >= 0){
+        if(grid[row][col-1] == 1) count++
+     }
+     if(col+1 < cols){
+         if(grid[row][col+1] == 1) count++
+     }
+     if(row+1 < rows){
+        if(grid[row+1][col] == 1 ) count ++
+     }
+     if(row+1 < rows && col-1 >= 0){
+        if(grid[row+1][col-1] == 1) count++
+     }
+    
+}
+
 
 window.onload = initialize;
