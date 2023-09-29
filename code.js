@@ -75,10 +75,23 @@ function setupControlsButtons(){
 }
 
 function clearButtonHandler(){
+    playing = false;
+    let startButton = document.querySelector("#start");
+    startButton.innerHTML = "start"
 
 }
 
 function startButtonHandler(){
+
+    if(playing){
+        playing = false
+        this.innerHTML ="continue"
+    }
+    else{
+        playing = true
+        this.innerHTML ="pause"
+        play()
+    }
 
 }
 
